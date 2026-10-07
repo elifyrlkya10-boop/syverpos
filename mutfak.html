@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyverPOS Mutfak</title>
+  <meta name="description" content="SyverPOS mutfak ekranı: gelen fişler ve alerjen kontrolü.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="mutfak">
+  <div class="app">
+    <header class="bar kbar">
+      <a class="brand" href="index.html">SyverPOS <span>Mutfak</span></a>
+      <div class="kstats" aria-live="polite">
+        <span><strong id="n-waiting">0</strong> bekleyen</span>
+        <span class="is-alert"><strong id="n-allergy">0</strong> alerjenli</span>
+      </div>
+      <div class="bar-right">
+        <span id="mode" class="mode-pill" hidden></span>
+        <button id="sound" class="btn btn-quiet" type="button" aria-pressed="false">Sesli uyarıyı aç</button>
+        <span id="clock" class="clock" aria-label="Saat"></span>
+      </div>
+    </header>
+
+    <main class="kboard">
+      <section class="queue" aria-label="Bekleyen fişler">
+        <div id="queue" class="queue-grid"></div>
+      </section>
+      <aside class="done" aria-label="Hazır siparişler">
+        <h2>Hazır</h2>
+        <ol id="done"></ol>
+      </aside>
+    </main>
+  </div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/mutfak.js"></script>
+</body>
+</html>

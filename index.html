@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyverPOS</title>
+  <meta name="description" content="Alerjen kontrollü restoran adisyon ve mutfak ekranı. Garson ve mutfak ekranını yan yana dene.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="landing">
+  <div class="l-wrap">
+    <header class="l-head">
+      <div>
+        <h1>SyverPOS</h1>
+        <p>Alerjen kontrollü adisyon sistemi. Garson misafirin alerjisini girer, sistem riskli ürünü engeller, mutfak alerjeni onaylamadan sipariş hazır olmaz.</p>
+      </div>
+      <div class="l-links">
+        <a class="btn btn-primary" href="adisyon.html" target="_blank" rel="noopener">Garson ekranını aç</a>
+        <a class="btn" href="mutfak.html" target="_blank" rel="noopener">Mutfak ekranını aç</a>
+      </div>
+    </header>
+
+    <main class="demo" aria-label="Canlı demo">
+      <section class="frame">
+        <div class="frame-bar">Garson <a href="adisyon.html" target="_blank" rel="noopener">Tam ekran</a></div>
+        <iframe src="adisyon.html" title="Garson ekranı"></iframe>
+      </section>
+      <section class="frame is-kitchen">
+        <div class="frame-bar">Mutfak <a href="mutfak.html" target="_blank" rel="noopener">Tam ekran</a></div>
+        <iframe src="mutfak.html" title="Mutfak ekranı"></iframe>
+      </section>
+    </main>
+
+    <ol class="steps" aria-label="Nasıl denenir">
+      <li><strong>Masa seç</strong><span>Garson ekranında Masa 1'e dokun.</span></li>
+      <li><strong>Alerji işaretle</strong><span>Kişi 1 için Soya ve Susam'ı seç. Teriyaki Somon kırmızıya döner, eklenemez.</span></li>
+      <li><strong>Mutfağa gönder</strong><span>California Roll ekle. Susam çıkarılarak hazırlanacağı yazar. Mutfağa gönder.</span></li>
+      <li><strong>Mutfakta onayla</strong><span>Alerjen kutusunu işaretle, siparişi hazır yap. Garsona "Masa 1 siparişi hazır" düşer.</span></li>
+    </ol>
+
+    <p class="l-note">Ekranların üst çubuğunda "Demo modu" yazıyorsa veriler bu tarayıcıda tutulur. Garson tableti ve mutfak ekranını farklı cihazlarda kullanmak için PHP ve MySQL ile çalışan sunucu modu <a href="https://github.com/elifyrlkya10-boop/syverpos#sunucu-modu-xampp">README'de</a> anlatılıyor.</p>
+
+    <footer class="l-foot">
+      <span>Elif Nur Yerlikaya, İstanbul Arel Üniversitesi Bilgisayar Programcılığı bitirme projesi</span>
+      <a href="https://github.com/elifyrlkya10-boop/syverpos">Kaynak kod</a>
+    </footer>
+  </div>
+</body>
+</html>

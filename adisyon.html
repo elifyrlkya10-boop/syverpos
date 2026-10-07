@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SyverPOS Garson</title>
+  <meta name="description" content="SyverPOS garson ekranı: masa, kişi, alerjen ve sipariş.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="garson">
+  <div class="app">
+    <header class="bar">
+      <a class="brand" href="index.html">SyverPOS <span>Garson</span></a>
+      <div class="bar-right">
+        <span id="mode" class="mode-pill" hidden></span>
+        <button id="sound" class="btn btn-quiet" type="button" aria-pressed="false">Sesli uyarıyı aç</button>
+        <button id="reset" class="btn btn-quiet" type="button">Demoyu sıfırla</button>
+        <span id="clock" class="clock" aria-label="Saat"></span>
+      </div>
+    </header>
+
+    <div id="notices" class="notices" aria-live="polite"></div>
+
+    <!-- 1. Ekran: masa planı -->
+    <main id="view-tables" class="floor">
+      <div class="floor-head">
+        <div>
+          <h1>Masalar</h1>
+          <p>Sipariş almak için masaya dokun.</p>
+        </div>
+        <ul class="legend" aria-label="Renklerin anlamı">
+          <li class="is-empty"><span class="dot"></span>Boş</li>
+          <li class="is-open"><span class="dot"></span>Açık</li>
+          <li class="is-kitchen"><span class="dot"></span>Mutfakta</li>
+          <li class="is-ready"><span class="dot"></span>Hazır</li>
+        </ul>
+      </div>
+      <div id="table-grid" class="table-grid"></div>
+    </main>
+
+    <!-- 2. Ekran: seçilen masanın siparişi -->
+    <main id="view-table" class="order" hidden>
+      <section class="order-side" aria-label="Sipariş al">
+        <div class="order-top">
+          <div class="table-title">
+            <button id="back" class="btn btn-quiet back" type="button">Masalar</button>
+            <h1 id="table-title">Masa</h1>
+          </div>
+
+          <div class="guest-block">
+            <div id="guests" class="guests" aria-label="Kişiler"></div>
+            <div class="allergy-row">
+              <span id="allergy-label" class="allergy-label">Alerjiler</span>
+              <div id="allergy-chips" class="chips" aria-label="Alerjenler"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-tools">
+          <input id="search" class="search" type="search" placeholder="Menüde ara" aria-label="Menüde ara" autocomplete="off">
+          <label id="safe-only-wrap" class="safe-only" hidden>
+            <input id="safe-only" type="checkbox"> Sadece uygun ürünler
+          </label>
+        </div>
+        <div id="cats" class="cats" aria-label="Kategoriler"></div>
+
+        <div class="menu-scroll">
+          <p class="menu-hint">Kesik çizgili alerjen üründen çıkarılabilir.</p>
+          <div id="dishes" class="dishes"></div>
+        </div>
+      </section>
+
+      <aside id="check" class="check" aria-label="Adisyon">
+        <div class="check-head">
+          <h2 id="check-title">Adisyon</h2>
+          <button id="check-close" class="btn btn-quiet check-close" type="button">Menüye dön</button>
+        </div>
+        <div id="check-body" class="check-body"></div>
+        <div class="check-foot">
+          <div class="total"><span>Toplam</span><strong id="total">0 TL</strong></div>
+          <button id="send" class="btn btn-primary btn-big" type="button">Mutfağa gönder</button>
+          <div class="foot-row">
+            <button id="print" class="btn" type="button">Fiş yazdır</button>
+            <button id="close-table" class="btn" type="button">Masayı kapat</button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="mobile-bar">
+        <button id="open-check" class="btn" type="button">Adisyon <span id="mb-count"></span></button>
+        <strong id="mb-total" class="mb-total">0 TL</strong>
+        <button id="mb-send" class="btn btn-primary" type="button">Mutfağa gönder</button>
+      </div>
+    </main>
+  </div>
+
+  <div id="print-area" aria-hidden="true"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/adisyon.js"></script>
+</body>
+</html>

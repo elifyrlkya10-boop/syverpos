@@ -1,0 +1,4 @@
+# Ayar ve yardımcı dosyalar tarayıcıdan doğrudan açılamasın
+<FilesMatch "^(config|db)\.php$">
+    Require all denied
+</FilesMatch>
