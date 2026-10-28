@@ -148,14 +148,27 @@
       table.guests = table.guests.filter((g) => g.id !== guest.id);
     },
 
-    alerji_degistir(s, { masa, kisi, alerjen }) {
-      const guest = findGuest(findTable(s, masa), kisi);
+    // Hedef durum açıkça gönderilir (acik: true/false), işlem tekrarlanırsa sonuç değişmez
+    alerji_degistir(s, { masa, kisi, alerjen, acik }) {
+      const table = findTable(s, masa);
+      const guest = findGuest(table, kisi);
       const id = Number(alerjen);
+      if (typeof acik !== 'boolean') throw new RuleError('Eksik ya da hatalı bilgi: acik');
       if (!S.allergen(id)) throw new RuleError('Alerjen bulunamadı.');
-      const i = guest.allergies.indexOf(id);
-      if (i >= 0) guest.allergies.splice(i, 1);
-      else guest.allergies.push(id);
+      const has = guest.allergies.includes(id);
+      if (acik && !has) guest.allergies.push(id);
+      if (!acik && has) guest.allergies.splice(guest.allergies.indexOf(id), 1);
       guest.allergies.sort((a, b) => a - b);
+
+      // Mutfakta bekleyen fişlerdeki bu kişinin kalemleri güncel alerjiyi göstersin
+      s.tickets.filter((t) => t.tableId === table.id && t.status === 'waiting').forEach((t) => {
+        t.items.forEach((item) => {
+          const line = table.lines.find((l) => l.id === item.lineId);
+          if (!line || line.guestId !== guest.id) return;
+          item.allergies = names(guest.allergies);
+          item.remove = names(S.risk(S.product(line.productId), guest.allergies).removable);
+        });
+      });
     },
 
     urun_ekle(s, { masa, kisi, urun }) {
@@ -256,11 +269,13 @@
     hazir(s, { fis, kontrol }) {
       const ticket = s.tickets.find((t) => t.id === Number(fis) && t.status === 'waiting');
       if (!ticket) throw new RuleError('Bu fiş zaten hazır ya da masa kapatılmış.');
-      const hasAllergy = ticket.items.some((i) => i.allergies.length);
-      if (hasAllergy && !kontrol) throw new RuleError('Alerjenli fiş, alerjen kontrolü onaylanmadan hazır yapılamaz.');
+      const table = s.tables[ticket.tableId];
+      const liveAllergy = table && table.lines.some((l) => l.ticketId === ticket.id
+        && table.guests.some((g) => g.id === l.guestId && g.allergies.length));
+      const hasAllergy = liveAllergy || ticket.items.some((i) => i.allergies.length);
+      if (hasAllergy && kontrol !== true) throw new RuleError('Alerjenli fiş, alerjen kontrolü onaylanmadan hazır yapılamaz.');
       ticket.status = 'ready';
       ticket.readyAt = new Date().toISOString();
-      const table = s.tables[ticket.tableId];
       if (table) table.lines.forEach((l) => { if (l.ticketId === ticket.id) l.status = 'ready'; });
       s.notices.push({ id: `N${ticket.id}`, tableId: ticket.tableId, ticketId: ticket.id, at: ticket.readyAt, seen: false });
     },

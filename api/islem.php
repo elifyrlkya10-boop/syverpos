@@ -96,6 +96,25 @@ function varsayilanMisafirler(PDO $db, int $masa): void
 
 /* ---------- İşlemler ---------- */
 
+/**
+ * Kişinin alerjileri değişince, mutfakta bekleyen satırlarının fiş kalemlerini günceller.
+ * Böylece mutfak ekranı sonradan işaretlenen alerjiyi görür ve "hazır" kapısı onay ister.
+ */
+function fisAlerjileriniGuncelle(PDO $db, int $misafirId): void
+{
+    $satirlar = $db->prepare("SELECT id, urun_id FROM siparisler WHERE misafir_id = ? AND durum = 'mutfakta'");
+    $satirlar->execute([$misafirId]);
+    $alerjiler = misafirAlerjileri($db, $misafirId);
+    foreach ($satirlar->fetchAll() as $s) {
+        $risk = urunRiski($db, (int) $s['urun_id'], $alerjiler);
+        calistir($db, 'UPDATE fis_kalemleri SET alerjenler = ?, cikarilacaklar = ? WHERE siparis_id = ?', [
+            json_encode(alerjenAdlari($db, $alerjiler), JSON_UNESCAPED_UNICODE),
+            json_encode(alerjenAdlari($db, $risk['cikar']), JSON_UNESCAPED_UNICODE),
+            $s['id'],
+        ]);
+    }
+}
+
 $islemler = [
 
     'kisi_ekle' => function (PDO $db, array $v): array {
@@ -124,16 +143,22 @@ $islemler = [
         return [];
     },
 
+    // Hedef durum açıkça gönderilir (acik: true/false). İşlem tekrarlanırsa sonuç değişmez.
     'alerji_degistir' => function (PDO $db, array $v): array {
         $misafir = misafirBul($db, sayi($v, 'masa'), sayi($v, 'kisi'));
         $alerjen = sayi($v, 'alerjen');
+        if (!is_bool($v['acik'] ?? null)) {
+            throw new IsKuraliHatasi('Eksik ya da hatalı bilgi: acik');
+        }
         if (!tekSatir($db, 'SELECT id FROM alerjenler WHERE id = ?', [$alerjen])) {
             throw new IsKuraliHatasi('Alerjen bulunamadı.');
         }
-        $silinen = calistir($db, 'DELETE FROM misafir_alerjen WHERE misafir_id = ? AND alerjen_id = ?', [$misafir['id'], $alerjen]);
-        if ($silinen === 0) {
-            calistir($db, 'INSERT INTO misafir_alerjen (misafir_id, alerjen_id) VALUES (?, ?)', [$misafir['id'], $alerjen]);
+        if ($v['acik']) {
+            calistir($db, 'INSERT IGNORE INTO misafir_alerjen (misafir_id, alerjen_id) VALUES (?, ?)', [$misafir['id'], $alerjen]);
+        } else {
+            calistir($db, 'DELETE FROM misafir_alerjen WHERE misafir_id = ? AND alerjen_id = ?', [$misafir['id'], $alerjen]);
         }
+        fisAlerjileriniGuncelle($db, (int) $misafir['id']);
         return [];
     },
 
@@ -271,8 +296,10 @@ $islemler = [
         if (!$fis) {
             throw new IsKuraliHatasi('Bu fiş zaten hazır ya da masa kapatılmış.');
         }
-        $alerjenli = tekSatir($db, "SELECT id FROM fis_kalemleri WHERE fis_id = ? AND alerjenler <> '[]' LIMIT 1", [$fisId]);
-        if ($alerjenli && empty($v['kontrol'])) {
+        // Fiş kalemlerine ek olarak kişilerin şu anki alerjilerine de bak
+        $alerjenli = tekSatir($db, "SELECT id FROM fis_kalemleri WHERE fis_id = ? AND alerjenler <> '[]' LIMIT 1", [$fisId])
+            ?: tekSatir($db, 'SELECT ma.misafir_id FROM siparisler s JOIN misafir_alerjen ma ON ma.misafir_id = s.misafir_id WHERE s.fis_id = ? LIMIT 1', [$fisId]);
+        if ($alerjenli && ($v['kontrol'] ?? null) !== true) {
             throw new IsKuraliHatasi('Alerjenli fiş, alerjen kontrolü onaylanmadan hazır yapılamaz.');
         }
         $zaman = simdi();

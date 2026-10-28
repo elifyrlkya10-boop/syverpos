@@ -10,7 +10,7 @@
   const { esc } = S;
 
   let state = null;
-  const checked = {};          // fiş no → alerjen kontrol kutusu işaretli mi
+  const checked = {};          // fiş anahtarı (no + gönderim zamanı) → alerjen kontrol kutusu işaretli mi
   let knownTicketIds = null;   // ilk çizimde ses çalmamak için null
   const freshIds = new Set();  // yeni gelen fişler kısa bir vurgu alır
 
@@ -22,6 +22,8 @@
     nAllergy: $('n-allergy')
   };
 
+  // Aynı numara başka bir fiş için yeniden verilse bile (demo sıfırlama) onay taşınmasın
+  const ckey = (ticket) => `${ticket.id}@${ticket.sentAt}`;
   const hasAllergy = (ticket) => ticket.items.some((i) => i.allergies.length);
   const ageText = (min) => (min < 1 ? 'Şimdi' : `${min} dk`);
 
@@ -32,6 +34,10 @@
     const waiting = state.tickets
       .filter((t) => t.status === 'waiting')
       .sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+
+    // Bekleme listesinden çıkan fişlerin onayı unutulur (hazır yapıldı, geri alındı, masa kapandı)
+    const live = new Set(waiting.map(ckey));
+    Object.keys(checked).forEach((key) => { if (!live.has(key)) delete checked[key]; });
     const done = state.tickets
       .filter((t) => t.status === 'ready')
       .sort((a, b) => b.readyAt.localeCompare(a.readyAt))
@@ -72,7 +78,7 @@
   function ticketHtml(ticket) {
     const allergy = hasAllergy(ticket);
     const age = S.minutesSince(ticket.sentAt);
-    const canFinish = !allergy || checked[ticket.id];
+    const canFinish = !allergy || checked[ckey(ticket)];
     return `
       <article class="ticket ${allergy ? 'has-allergy' : ''} ${freshIds.has(ticket.id) ? 'is-new' : ''}">
         <header class="ticket-head">
@@ -85,7 +91,7 @@
         <footer class="ticket-foot">
           ${allergy ? `
             <label class="t-check">
-              <input type="checkbox" data-check="${ticket.id}" ${checked[ticket.id] ? 'checked' : ''}>
+              <input type="checkbox" data-check="${ticket.id}" ${checked[ckey(ticket)] ? 'checked' : ''}>
               <span>Tüm alerjenleri kontrol ettim, ayrı ekipman kullandım</span>
             </label>` : ''}
           <button type="button" class="t-ready" data-ready="${ticket.id}" ${canFinish ? '' : 'disabled'}>
@@ -134,10 +140,14 @@
 
   async function markReady(ticketId) {
     const ticket = state.tickets.find((t) => t.id === ticketId);
-    if (!ticket || (hasAllergy(ticket) && !checked[ticketId])) return;
+    if (!ticket || (hasAllergy(ticket) && !checked[ckey(ticket)])) return;
     // Sunucu da alerjen onayı olmadan alerjenli fişi hazır yapmaz
-    const result = await run('hazir', { fis: ticketId, kontrol: Boolean(checked[ticketId]) });
-    if (result) delete checked[ticketId];
+    try {
+      await run('hazir', { fis: ticketId, kontrol: checked[ckey(ticket)] === true });
+    } finally {
+      delete checked[ckey(ticket)];
+      render(); // hata olsa da düğme kilitli kalmasın, onay yeniden alınsın
+    }
   }
 
   function undoReady(ticketId) {
@@ -160,8 +170,9 @@
   document.addEventListener('change', (event) => {
     const box = event.target.closest('[data-check]');
     if (!box) return;
-    const id = Number(box.dataset.check);
-    checked[id] = box.checked;
+    const ticket = state.tickets.find((t) => t.id === Number(box.dataset.check) && t.status === 'waiting');
+    if (!ticket) return;
+    checked[ckey(ticket)] = box.checked;
     const ready = box.closest('.ticket').querySelector('[data-ready]');
     ready.disabled = !box.checked;
   });

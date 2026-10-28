@@ -322,9 +322,24 @@
     render();
   }
 
+  // Alerji hedef durumuyla gönderilir; aynı istek tekrarlansa da alerji silinmez.
+  // Kaldırmak güvenlik açısından önemli olduğu için önce onay istenir.
   function toggleAllergy(allergenId) {
     const guest = activeGuest(currentTable());
-    run('alerji_degistir', { masa: currentTableId, kisi: guest.id, alerjen: allergenId });
+    const masa = currentTableId;
+    const send = (acik) => run('alerji_degistir', { masa, kisi: guest.id, alerjen: allergenId, acik });
+    if (!guest.allergies.includes(allergenId)) {
+      send(true);
+      return;
+    }
+    S.openModal({
+      title: 'Alerji kaldırılsın mı?',
+      body: `<p>${esc(guest.name)} için <strong>${esc(S.allergen(allergenId).name)}</strong> alerjisi kaldırılacak. Misafirin bu alerjisi gerçekten yoksa onayla.</p>`,
+      actions: [
+        { label: 'Vazgeç' },
+        { label: 'Alerjiyi kaldır', kind: 'danger', onClick: () => { send(false); } }
+      ]
+    });
   }
 
   async function addGuest() {

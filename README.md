@@ -17,7 +17,8 @@ Bir suşi restoranında mutfakta çalışıyorum. Alerji bilgisi garsondan mutfa
 - Masa planı: boş, açık, mutfakta ve hazır masalar renkle ayrılır; alerjili misafiri olan masa işaretlenir.
 - Kişi bazlı sipariş: her misafirin alerjileri ayrı seçilir.
 - Ana malzemesinde alerjen olan ürün **eklenemez**. Çıkarılabilir malzemede alerjen varsa ürün eklenir, mutfağa "çıkar" notu gider.
-- Alerji ürün eklendikten **sonra** işaretlense bile sistem satırı yakalar ve mutfağa gönderilmesine izin vermez.
+- Alerji ürün eklendikten **sonra** işaretlense bile sistem satırı yakalar ve mutfağa gönderilmesine izin vermez. Fiş mutfağa gittikten sonra işaretlenen alerji de mutfak ekranındaki fişe yansır ve "hazır" için aşçı onayı ister.
+- Alerjiyi kaldırmadan önce garsondan onay istenir.
 - "Sadece uygun ürünler" filtresi, satır notu (hızlı notlarla), 80 mm fiş çıktısı.
 - Mutfak "hazır" deyince "Masa 3 siparişi hazır" bildirimi ve isteğe bağlı sesli uyarı.
 - Tablet ve telefonda kullanılabilir.

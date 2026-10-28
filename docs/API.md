@@ -49,7 +49,7 @@ Bir iş kuralı ihlal edilirse **HTTP 409** ve kullanıcıya gösterilecek mesaj
 |---|---|---|
 | `kisi_ekle` | `masa` | Boştaki en küçük numarayla "Kişi N" ekler. Sonuç: `kisiId` |
 | `kisi_sil` | `masa`, `kisi` | Masada en az bir kişi kalır. Adisyonda ürünü olan kişi silinemez |
-| `alerji_degistir` | `masa`, `kisi`, `alerjen` | Alerjeni ekler ya da kaldırır |
+| `alerji_degistir` | `masa`, `kisi`, `alerjen`, `acik` | `acik: true` alerjiyi ekler, `acik: false` kaldırır. `acik` mutlaka `true` ya da `false` olmalı; aynı istek tekrarlansa da sonuç değişmez. Kişinin mutfakta bekleyen satırlarının fiş kalemleri de güncellenir |
 | `urun_ekle` | `masa`, `kisi`, `urun` | Ana malzemede kişinin alerjeni varsa reddedilir. Aynı kişiye aynı ürün tekrar eklenirse adet artar |
 | `adet_degistir` | `masa`, `satir`, `fark` (`1` / `-1`) | Sadece mutfağa gitmemiş satırlar. Adet 0 olursa satır silinir |
 | `satir_sil` | `masa`, `satir` | Sadece mutfağa gitmemiş satırlar |
@@ -58,7 +58,7 @@ Bir iş kuralı ihlal edilirse **HTTP 409** ve kullanıcıya gösterilecek mesaj
 | `masa_kapat` | `masa` | Mutfakta bekleyen fiş varsa reddedilir. Hesabı `kapanan_hesaplar`'a yazar, masayı sıfırlar |
 | `bildirim_goruldu` | `bildirim` | "Hazır" bildirimini kapatır |
 | `masa_bildirimleri_goruldu` | `masa` | Masanın bütün bildirimlerini kapatır |
-| `hazir` | `fis`, `kontrol` | Alerjenli fiş için `kontrol: true` zorunlu. Garsona bildirim oluşturur |
+| `hazir` | `fis`, `kontrol` | Fişte ya da fişteki kişilerin güncel alerjilerinde alerjen varsa `kontrol` tam olarak `true` olmalı (`"true"`, `1` gibi değerler kabul edilmez). Garsona bildirim oluşturur |
 | `hazir_geri_al` | `fis` | Yanlışlıkla "hazır" denen fişi bekleyen duruma döndürür |
 | `sifirla` | | Bütün masaları, adisyonları ve fişleri siler. Menü ve geçmiş hesaplar kalır |
 
